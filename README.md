@@ -17,6 +17,11 @@
   ```play.galaxite.net``` → ```tuserver.com```
 - **Hotspot WiFi Automático**: Crea tu propia red para dispositivos móviles
 
+## 🖥️ Hardware
+- Raspberry Pi W
+- Ethernet Adapter Unno
+- MicroSD 8G
+
 ## ⚙️ Arquitectura del Sistema
 ```mermaid
 graph TD
