@@ -26,3 +26,31 @@ graph TD
     C -->|Reglas Personalizadas| E[Opciones Avanzadas]
     F[Web Interface] -->|Control| C
     G[iptables] -->|Redirección| C
+
+```
+
+## Instalacion
+
+### Requisitos previos:
+
+  1. Git instalado (generalmente viene preinstalado en Raspberry Pi OS, pero si no lo tienes, ejecuta):
+
+  ```
+  sudo apt update && sudo apt install git -y
+  ```
+
+  2. Clonar el repositorio:
+     
+     a. Abre una terminal en tu Raspberry Pi (o conéctate por SSH).
+     b. Crea la carpeta de Odoco
+     ```
+     mkdir Odoco
+     ```
+     b. Navega al directorio Odoco donde se va a clonar el repositorio:
+     ```
+       cd ~/Odoco
+     ```
+     c. Clona el repositorio usando el comando git clone seguido de la URL del repositorio (copia la URL desde GitHub):
+     ```
+       cd ~/Odoco
+     ```
