@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración</title>
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h4>Configuración WiFi</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if message %}
+                            <div class="alert alert-success">{{ message }}</div>
+                        {% endif %}
+                        <form method="POST" action="/config">
+                            <div class="mb-3">
+                                <label class="form-label">SSID WiFi:</label>
+                                <input type="text" name="wifi_ssid" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contraseña:</label>
+                                <input type="password" name="wifi_password" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+   <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

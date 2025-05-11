@@ -1,0 +1,121 @@
+#!/bin/bash
+# Odocoileus virginianus - Script de desinstalación
+
+# Configuración de colores
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Configuración automática
+CURRENT_USER=$(whoami)
+INSTALL_DIR="/home/$CURRENT_USER/Odoco"
+SERVICE_NAME="odoco-web.service"
+SYSTEMD_SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME"
+
+# Funciones de ayuda
+function display_error() {
+    echo -e "${BOLD}${RED}Error:${NC} $1" >&2
+    exit 1
+}
+
+function display_warning() {
+    echo -e "${BOLD}${YELLOW}Advertencia:${NC} $1"
+}
+
+function display_success() {
+    echo -e "${GREEN}✔${NC} $1"
+}
+
+# Verificar root
+if [ "$(id -u)" -ne 0 ]; then
+    echo -e "${YELLOW}Este script requiere privilegios root. Usando sudo...${NC}"
+    exec sudo "$0" "$@"
+fi
+
+echo -e "${BOLD}=== Odoco Uninstaller ===${NC}"
+echo -e "Usuario: ${BOLD}$CURRENT_USER${NC}"
+echo -e "Directorio: ${BOLD}$INSTALL_DIR${NC}\n"
+
+# 1. Detener y deshabilitar el servicio
+echo -e "${BOLD}1. Deteniendo el servicio...${NC}"
+if systemctl is-active --quiet "$SERVICE_NAME"; then
+    if systemctl stop "$SERVICE_NAME"; then
+        display_success "Servicio detenido"
+    else
+        display_warning "No se pudo detener el servicio"
+    fi
+else
+    display_success "El servicio ya estaba inactivo"
+fi
+
+if systemctl is-enabled --quiet "$SERVICE_NAME"; then
+    if systemctl disable "$SERVICE_NAME"; then
+        display_success "Servicio deshabilitado"
+    else
+        display_warning "No se pudo deshabilitar el servicio"
+    fi
+else
+    display_success "El servicio ya estaba deshabilitado"
+fi
+
+# 2. Eliminar archivo de servicio
+echo -e "\n${BOLD}2. Eliminando configuración del servicio...${NC}"
+if [ -f "$SYSTEMD_SERVICE_FILE" ]; then
+    if rm -f "$SYSTEMD_SERVICE_FILE"; then
+        display_success "Archivo de servicio eliminado"
+    else
+        display_error "No se pudo eliminar $SYSTEMD_SERVICE_FILE"
+    fi
+else
+    display_success "El archivo de servicio no existía"
+fi
+
+# 3. Recargar systemd
+echo -e "\n${BOLD}3. Recargando systemd...${NC}"
+if systemctl daemon-reload; then
+    display_success "Systemd recargado"
+else
+    display_warning "Error al recargar systemd"
+fi
+
+# 4. Eliminar reglas de firewall (opcional)
+echo -e "\n${BOLD}4. Limpiando reglas de firewall...${NC}"
+if command -v ufw >/dev/null; then
+    if ufw status | grep -q "80/tcp"; then
+        if ufw delete allow 80/tcp; then
+            display_success "Regla de firewall eliminada"
+        else
+            display_warning "No se pudo eliminar regla del firewall"
+        fi
+    else
+        display_success "No existían reglas para el puerto 80"
+    fi
+else
+    display_success "UFW no está instalado, nada que limpiar"
+fi
+
+# 5. Eliminar archivos (opcional - comentado por seguridad)
+# echo -e "\n${BOLD}5. Eliminando archivos...${NC}"
+# read -p "¿Eliminar directorio $INSTALL_DIR? [y/N] " confirm
+# if [[ $confirm =~ ^[Yy]$ ]]; then
+#     if rm -rf "$INSTALL_DIR"; then
+#         display_success "Directorio eliminado"
+#     else
+#         display_error "Error al eliminar el directorio"
+#     fi
+# else
+#     display_success "Archivos conservados en $INSTALL_DIR"
+# fi
+
+echo -e "\n${BOLD}${GREEN}✔ Desinstalación completada${NC}"
+echo -e "\n${YELLOW}Nota:${NC} Los archivos en $INSTALL_DIR se han conservado."
+echo -e "Para eliminarlos manualmente ejecute:"
+echo -e "${BOLD}rm -rf $INSTALL_DIR${NC}\n"
+
+echo -e "${BOLD}Acciones realizadas:${NC}"
+echo "• Servicio detenido y deshabilitado"
+echo "• Archivo de servicio eliminado"
+echo "• Systemd recargado"
+echo "• Reglas de firewall limpiadas"

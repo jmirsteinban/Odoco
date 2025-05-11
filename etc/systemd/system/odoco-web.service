@@ -1,0 +1,26 @@
+[Unit]
+Description=Odoco Web Interface
+After=network.target
+StartLimitIntervalSec=60
+
+[Service]
+User=rpi
+Group=rpi
+WorkingDirectory=/home/rpi/Odoco/www
+ExecStart=/usr/bin/authbind --deep /home/rpi/Odoco/venv/bin/python3 /home/rpi/Odoco/www/app.py
+Restart=always
+RestartSec=5s
+Environment="PYTHONPATH=/home/rpi/Odoco/www"
+
+# Límites de recursos
+MemoryMax=256M
+CPUQuota=80%
+LimitNOFILE=4096
+
+# Seguridad
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

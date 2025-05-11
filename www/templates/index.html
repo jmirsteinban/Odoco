@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control RPi Zero</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+
+<style>
+
+</style>
+
+<body>
+    <div class="container mt-2">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card shadow">
+                    <div class="card-header text-white bg-morado">
+                        <h3 class="text-center">🦌 Odocoileus</h3>
+                        <h6 class="text-center"> Minecraft Bedrock Server Redirector </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <h5 class="card-title">Estado del sistema</h5>
+                            <hr>
+                            <br>
+                        </div>
+
+                        <div class="row">
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Wi-Fi</h6>
+                            <div class="col-2">
+                                <img class="img-fluid" src="{{ url_for('static', filename='images/wifi.png') }}"
+                                    alt="Wi Fi">
+                            </div>
+                            <div class="col">
+                                <p class="lh-sm">
+                                    ✅ NIC: w0per <br>
+                                    ✅ SSID: {{ ssid }} MAOW 2.4G <br>
+                                    ✅ IP: {{ ip }} 172.16.1.220
+                                </p>
+                            </div>
+                            <div class="col-2">
+                                <a href="/config">
+                                    <img class="img-fluid" src="{{ url_for('static', filename='images/crafting.png') }}"
+                                        alt="Configuración">
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <h6 class="card-subtitle mb-2 text-body-secondary">DNS.s - IpTables</h6>
+                            <div class="col-2">
+                                <img class="img-fluid" src="{{ url_for('static', filename='images/change.png')}}"
+                                    alt="DNS.s - IpTables">
+                            </div>
+                            <div class="col">
+                                <p class="lh-sm">
+                                    ✅ play.galaxite.net:19132 <br>
+                                    ✅ play.craftersmc.net:19132
+                                </p>
+                            </div>
+                            <div class="col-2">
+                                <a href="/config">
+                                    <img class="img-fluid" src="{{ url_for('static', filename='images/crafting.png') }}"
+                                        alt="Configuración">
+                                </a>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <h6 class="card-subtitle mb-2 text-body-secondary">RPI Zero W </h6>
+                            <div class="col-2">
+                                <img class="img-fluid" src="{{ url_for('static', filename='images/rpizero.png')}}"
+                                    alt="Raspberry Pi Zero">
+                            </div>
+                            <div class="col">
+                                <p class="lh-sm">
+                                    ✅ CPU: ARMv6 <br>
+                                    ✅ RAM: 512MB <br>
+                                    ✅ Temp: 45°C
+                                </p>
+                            </div>
+                            <div class="col-2">
+                                <a href="/config">
+                                    <img class="img-fluid" src="{{ url_for('static', filename='images/crafting.png') }}"
+                                        alt="Configuración">
+                                </a>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <h6 class="card-subtitle mb-2 text-body-secondary">RackNet </h6>
+                            <div class="col-2">
+                                <img class="img-fluid" src="{{ url_for('static', filename='images/cube.png')}}"
+                                    alt="RackNet">
+                            </div>
+                            <div class="col">
+                                <p class="lh-sm">
+                                    ✅ play.galaxite.net:19132
+                                </p>
+                            </div>
+                            <div class="col-2">
+                                <a href="/config">
+                                    <img class="img-fluid" src="{{ url_for('static', filename='images/crafting.png') }}"
+                                        alt="Configuración">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Ethernet </h6>
+                            <div class="col-2">
+                                <img class="img-fluid" src="{{ url_for('static', filename='images/ethernet.png')}}"
+                                    alt="Ethernet">
+                            </div>
+                            <div class="col">
+                                <p class="lh-sm">
+                                    ✅ NIC: eth0 <br>
+                                    ✅ DHCP <br>
+                                    ✅ IP: 172.16.1.220 <br>
+                                </p>
+                            </div>
+                            <div class="col-2">
+                                <a href="/config">
+                                    <img class="img-fluid" src="{{ url_for('static', filename='images/crafting.png') }}"
+                                        alt="Configuración">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Internet </h6>
+                            <div class="col-2">
+                                <img class="img-fluid" src="{{ url_for('static', filename='images/web.png')}}"
+                                    alt="Internet">
+                            </div>
+                            <div class="col">
+                                <p class="lh-sm">
+                                    ✅ IP Gateway: <br>
+                                    ✅ IP Publica: {{ public_ip }}
+                                </p>
+                            </div>
+                            <div class="col-2">
+                                <a href="/config">
+                                    <img class="img-fluid" src="{{ url_for('static', filename='images/crafting.png') }}"
+                                        alt="Configuración">
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+
+</html>

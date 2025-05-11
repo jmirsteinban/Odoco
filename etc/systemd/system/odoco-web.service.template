@@ -1,0 +1,18 @@
+# Odocoileus virginianus v1.0
+#
+# odoco-web.service.template
+#
+
+[Unit]
+Description=Odoco Web Interface
+After=network.target
+
+[Service]
+User={{USER}}
+WorkingDirectory={{INSTALL_DIR}}/www
+ExecStart=/usr/bin/gunicorn --bind 0.0.0.0:80 --workers 1 app:app
+Restart=always
+Environment="PYTHONPATH={{INSTALL_DIR}}/www"
+
+[Install]
+WantedBy=multi-user.target

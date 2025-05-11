@@ -1,0 +1,7 @@
+Flata ingresar esto al install 
+
+sudo apt install authbind
+sudo touch /etc/authbind/byport/80
+sudo chown rpi:rpi /etc/authbind/byport/80
+sudo chmod 500 /etc/authbind/byport/80
+
