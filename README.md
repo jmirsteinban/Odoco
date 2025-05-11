@@ -50,5 +50,11 @@ graph TD
      ```
        git clone https://github.com/jmirsteinban/Odoco.git
      ```
-
-     Se creara la carpeta Odoco con todo lo nesesario
+     c. Dar permisos de ejecución
+     ```
+       chmod +x /Odoco/bin/odoco-install
+     ```
+     d. Ejecutar instalacion
+     ```
+       sudo /Odoco/bin/odoco-install
+     ```
