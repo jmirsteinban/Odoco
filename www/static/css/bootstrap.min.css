@@ -3,6 +3,20 @@
  * Copyright 2011-2025 The Bootstrap Authors
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
+
+@font-face {
+    font-family: 'Ubuntu Sans Static';
+    src: url('/static/fonts/static/UbuntuSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Ubuntu Sans Static', sans-serif;
+    font-weight: 400; /* Peso normal */
+    font-stretch: 100%; /* Ancho normal */
+}
+
 :root,
 [data-bs-theme="light"] {
   --bs-blue: #0d6efd;
@@ -70,7 +84,7 @@
   --bs-dark-border-subtle: #adb5bd;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
-  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto,
+  --bs-font-sans-serif: "Ubuntu Sans Static", system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas,

@@ -10,9 +10,15 @@ After=network.target
 [Service]
 User={{USER}}
 WorkingDirectory={{INSTALL_DIR}}/www
-ExecStart=/usr/bin/gunicorn --bind 0.0.0.0:80 --workers 1 app:app
-Restart=always
+ExecStart=/usr/bin/authbind --deep {{INSTALL_DIR}}/venv/bin/gunicorn --bind 0.0.0.0:80 --workers {{WORKERS}} app:app
+Restart=on-failure
+RestartSec=5s
 Environment="PYTHONPATH={{INSTALL_DIR}}/www"
+
+# Límites de recursos
+MemoryMax=256M
+CPUQuota=80%
 
 [Install]
 WantedBy=multi-user.target
+

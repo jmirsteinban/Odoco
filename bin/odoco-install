@@ -40,13 +40,13 @@ VENV_DIR="$INSTALL_DIR/venv"
 SERVICE_NAME="odoco-web.service"
 
 # Rutas importantes
-REPO_SERVICE_FILE="$INSTALL_DIR/etc/systemd/odoco-web.service"
+REPO_SERVICE_FILE="$INSTALL_DIR/etc/systemd/system/odoco-web.service"
 SYSTEMD_SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME"
 #SERVICE_ENV_FILE="$INSTALL_DIR/venv/bin/activate"
 
 # Dependencias
 PYTHON_DEPS=("flask" "gunicorn")
-SYSTEM_DEPS=("python3-pip" "python3-venv" "python3-full")
+SYSTEM_DEPS=("python3-pip" "python3-venv" "python3-full" "psutil")
 
 # --- Verificación inicial ---
 echo -e "${BOLD}=== Odoco Installer v1. ===${NC}"
@@ -64,17 +64,17 @@ if [ "$(id -u)" -ne 0 ]; then
     exec sudo -u $REAL_USER "$0" "$@"
 fi
 
-# --- Paso 1: Verificación de requisitos ---
+# 1: Verificación de requisitos ---
 echo -e "${BOLD}1. Verificando requisitos del sistema...${NC}"
 
-# Verificar puerto 80
+# 1.2: Verificar puerto 80
 if lsof -i :80 >/dev/null 2>&1; then
     display_warning "El puerto 80 está en uso por:"
     lsof -i :80 | awk '{print $1, $2}' | uniq
     display_error "Libera el puerto 80 antes de continuar"
 fi
 
-# --- Paso 2: Instalación de dependencias del sistema ---
+# 2: Instalación de dependencias del sistema ---
 echo -e "\n${BOLD}2. Instalando dependencias del sistema...${NC}"
 
 if ! apt-get update; then
@@ -86,7 +86,7 @@ if ! apt-get install -y "${SYSTEM_DEPS[@]}"; then
 fi
 display_success "Dependencias del sistema instaladas"
 
-# --- Paso 3: Configuración del entorno virtual ---
+# 3: Configuración del entorno virtual ---
 echo -e "\n${BOLD}3. Configurando entorno virtual...${NC}"
 
 if [ ! -d "$VENV_DIR" ]; then
@@ -98,10 +98,10 @@ else
     display_success "Entorno virtual ya existe"
 fi
 
-# --- Paso 4: Instalación de dependencias Python ---
+# 4: Instalación de dependencias Python ---
 echo -e "\n${BOLD}4. Instalando dependencias Python...${NC}"
 
-# Activar entorno virtual
+# 4.5: Activar entorno virtual
 source "$VENV_DIR/bin/activate" || display_error "No se pudo activar el entorno virtual"
 
 if ! pip install --upgrade pip; then
@@ -114,7 +114,7 @@ fi
 display_success "Dependencias Python instaladas en el entorno virtual"
 deactivate
 
-# --- Paso 5: Configuración del firewall ---
+# 5: Configuración del firewall ---
 echo -e "\n${BOLD}5. Configurando firewall...${NC}"
 
 if command -v ufw >/dev/null; then
@@ -131,7 +131,30 @@ else
     display_warning "UFW no está instalado"
 fi
 
-# --- Paso 6: Configuración del servicio systemd ---
+# 5.5: Configurar authbind para puerto 80 ---
+echo -e "\n${BOLD}5.5 Configurando authbind para puerto 80...${NC}"
+
+if ! command -v authbind >/dev/null; then
+    if ! apt-get install -y authbind; then
+        display_error "No se pudo instalar authbind"
+    fi
+    display_success "Authbind instalado"
+fi
+
+# 5.6: Crear regla para puerto 80
+AUTHBIND_PORT_FILE="/etc/authbind/byport/80"
+if [ ! -f "$AUTHBIND_PORT_FILE" ]; then
+    if ! touch "$AUTHBIND_PORT_FILE"; then
+        display_error "No se pudo crear $AUTHBIND_PORT_FILE"
+    fi
+    chown "$REAL_USER:$REAL_USER" "$AUTHBIND_PORT_FILE"
+    chmod 500 "$AUTHBIND_PORT_FILE"
+    display_success "Authbind configurado para puerto 80"
+else
+    display_success "Authbind ya estaba configurado"
+fi
+
+# 6: Configuración del servicio systemd ---
 echo -e "\n${BOLD}6. Configurando servicio systemd...${NC}"
 
 if [ ! -f "$REPO_SERVICE_FILE" ]; then
@@ -173,6 +196,20 @@ if check_service_active "$SERVICE_NAME"; then
     display_success "Servicio activo y en ejecución"
 else
     display_error "El servicio no se pudo iniciar"
+fi
+
+# 8. Configurando Access Point Odoco
+echo -e "\n${BOLD}8. Configurando Access Point Odoco...${NC}"
+
+# Ejecutar el script del AP
+if ! sudo ./odoco_ap_setup.sh; then
+    display_warning "Error al configurar el AP. ¿Continuar? [S/n]"
+    read -r response
+    if [[ "$response" =~ ^[Nn] ]]; then
+        display_error "Instalación abortada."
+    fi
+else
+    display_success "Access Point y NAT configurados correctamente."
 fi
 
 # --- Mostrar resumen final ---

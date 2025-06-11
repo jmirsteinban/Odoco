@@ -1,39 +1,129 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración</title>
-        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <title>Control RPi Zero</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='odoco.css') }}">
 </head>
+
 <body>
-    <div class="container mt-5">
+    <div class="container mt-2">
         <div class="row">
-            <div class="col-md-6 mx-auto">
-                <div class="card">
-                    <div class="card-header bg-warning">
-                        <h4>Configuración WiFi</h4>
+            <div class="col-md-8 mx-auto">
+                <div class="card shadow">
+                    <div class="card-header text-white bg-morado">
+                        <h3 class="text-center">🦌 Odocoileus</h3>
+                        <h6 class="text-center"> Minecraft Bedrock Server Redirector </h6>
                     </div>
                     <div class="card-body">
-                        {% if message %}
-                            <div class="alert alert-success">{{ message }}</div>
-                        {% endif %}
-                        <form method="POST" action="/config">
-                            <div class="mb-3">
-                                <label class="form-label">SSID WiFi:</label>
-                                <input type="text" name="wifi_ssid" class="form-control" required>
+                        <div class="row">
+
+                            <div class="col-1">
+                                <img class="img-fluid" src="{{ url_for('static', filename='images/rpizero.png') }}"
+                                    alt="Wi Fi">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Contraseña:</label>
-                                <input type="password" name="wifi_password" class="form-control">
+                            <div class="col">
+
+                                <h5 class="card-title"> Configuración RPI</h5>
+
                             </div>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
-                        </form>
+
+                            <hr>
+                            <br>
+                        </div>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-4">
+                                    <h5>odoco-web.service</h5>
+                                </div>
+                                <div class="col-2">
+                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                        <button id="status" type="button" class="btn btn-primary"><i
+                                                class="bi bi-info-circle-fill"></i></button>
+                                        <button id="start" type="button" class="btn btn-success"><i
+                                                class="bi bi-play-circle-fill"></i></button>
+                                        <button id="stop" type="button" class="btn btn-danger"><i
+                                                class="bi bi-stop-circle-fill"></i></button>
+                                        <button id="restart" type="button" class="btn btn-warning"><i
+                                                class="bi bi-arrow-repeat"></i></button>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+
+                            <div class="row">
+                                <p>Salida del Servicio:</p>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+
+                                    <div class="alert alert-dark text-info" role="alert">
+                                        <div class="console bg-opacity-50" id="console-output">
+                                            <i class="bi bi-terminal"></i> Presiona un botón para ver el estado del
+                                            servicio...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                     </div>
+
+
                 </div>
             </div>
         </div>
     </div>
-   <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+
+    <script>
+        document.getElementById('start').addEventListener('click', () => {
+            executeCommand('start');
+        });
+        document.getElementById('stop').addEventListener('click', () => {
+            executeCommand('stop');
+        });
+        document.getElementById('restart').addEventListener('click', () => {
+            executeCommand('restart');
+        });
+        document.getElementById('status').addEventListener('click', () => {
+            executeCommand('status');
+        });
+
+        function executeCommand(action) {
+            const consoleOutput = document.getElementById('console-output');
+            consoleOutput.innerHTML = `<i class="bi bi-hourglass"></i> Ejecutando comando: ${action}...`;
+
+            fetch(`/service/${action}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        consoleOutput.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Error: ${data.error}`;
+                    } else {
+                        let output = `<i class="bi bi-terminal-fill"></i> $ systemctl ${action} odoco-web.service\n\n`;
+                        output += data.output || '';
+                        if (data.error) output += `\n<i class="bi bi-exclamation-circle-fill"></i> Error: ${data.error}`;
+                        consoleOutput.innerHTML = output;
+                    }
+                })
+                .catch(error => {
+                    consoleOutput.innerHTML = `<i class="bi bi-exclamation-octagon-fill"></i> Error de conexión: ${error}`;
+                });
+        }
+    </script>
+
+
 </body>
+
 </html>
