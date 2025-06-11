@@ -52,9 +52,9 @@ graph TD
      ```
      c. Dar permisos de ejecución
      ```
-       chmod +x Odoco/bin/odoco-install
+       chmod +x /Odoco/bin/odoco-install
      ```
      d. Ejecutar instalacion
      ```
-       sudo Odoco/bin/odoco-install
+       sudo /Odoco/bin/odoco-install
      ```
