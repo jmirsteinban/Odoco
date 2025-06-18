@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 
 # Odocoileus virginianus v1.0
 #
@@ -33,7 +35,8 @@ function check_service_active() {
 }
 
 # --- Configuración automática ---
-REAL_USER=$(who am i | awk '{print $1}')
+#REAL_USER=$(who am i | awk '{print $1}')
+REAL_USER=${SUDO_USER:-$(logname)}
 CURRENT_USER=${SUDO_USER:-$USER}
 INSTALL_DIR="/home/$REAL_USER/Odoco"
 VENV_DIR="$INSTALL_DIR/venv"
@@ -45,8 +48,11 @@ SYSTEMD_SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME"
 #SERVICE_ENV_FILE="$INSTALL_DIR/venv/bin/activate"
 
 # Dependencias
-PYTHON_DEPS=("flask" "gunicorn")
-SYSTEM_DEPS=("python3-pip" "python3-venv" "python3-full" "psutil")
+PYTHON_DEPS=("flask" "gunicorn" "psutil")
+SYSTEM_DEPS=("python3-pip" "python3-venv" "python3-full") 
+SYSTEM_DEPS=(python3-pip python3-venv python3-full python3-psutil)
+
+
 
 # --- Verificación inicial ---
 echo -e "${BOLD}=== Odoco Installer v1. ===${NC}"
@@ -59,10 +65,51 @@ if [ ! -d "$INSTALL_DIR" ]; then
 fi
 
 # Verificar si se ejecuta como root
+
+# Verificar si se ejecuta como root
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${YELLOW}Este script debe ejecutarse como root. Usando sudo...${NC}"
-    exec sudo -u $REAL_USER "$0" "$@"
+    echo -e "${YELLOW}Este script debe ejecutarse como root. Reejecutando con sudo...${NC}"
+    exec sudo "$0" "$@"
 fi
+
+
+#if [ "$(id -u)" -ne 0 ]; then
+#    echo -e "${YELLOW}Este script debe ejecutarse como root. Usando sudo...${NC}"
+#    exec sudo -u $REAL_USER "$0" "$@"
+#fi
+
+
+# 0: Validación y corrección de mirrors rotos ---
+echo -e "\n${BOLD}0. Verificando mirrors de APT...${NC}"
+
+MIRROR_PROBLEM="http://mirrors.ustc.edu.cn/ubuntu-ports"
+GOOD_MIRROR="http://ports.ubuntu.com"
+
+if grep -q "$MIRROR_PROBLEM" /etc/apt/sources.list; then
+    display_warning "Mirror chino detectado: reemplazando por $GOOD_MIRROR"
+    sed -i "s|$MIRROR_PROBLEM|$GOOD_MIRROR|g" /etc/apt/sources.list
+    display_success "Mirror corregido en /etc/apt/sources.list"
+fi
+
+# También verificar otros archivos en /etc/apt/sources.list.d/
+for FILE in /etc/apt/sources.list.d/*.list; do
+    if grep -q "$MIRROR_PROBLEM" "$FILE"; then
+        display_warning "Mirror detectado en $FILE: reemplazando..."
+        sed -i "s|$MIRROR_PROBLEM|$GOOD_MIRROR|g" "$FILE"
+        display_success "Mirror corregido en $FILE"
+    fi
+done
+
+# Intentar actualizar APT (reintentando si falla la primera vez)
+echo -e "${BOLD}Actualizando lista de paquetes...${NC}"
+if ! apt-get update; then
+    display_warning "Primer intento falló, reintentando en 5 segundos..."
+    sleep 5
+    if ! apt-get update; then
+        display_error "No se pudo actualizar la lista de paquetes. Verifica tu conexión o repositorios."
+    fi
+fi
+
 
 # 1: Verificación de requisitos ---
 echo -e "${BOLD}1. Verificando requisitos del sistema...${NC}"
@@ -89,28 +136,44 @@ display_success "Dependencias del sistema instaladas"
 # 3: Configuración del entorno virtual ---
 echo -e "\n${BOLD}3. Configurando entorno virtual...${NC}"
 
-if [ ! -d "$VENV_DIR" ]; then
-    if ! python3 -m venv "$VENV_DIR"; then
-        display_error "No se pudo crear el entorno virtual"
+RECREATE_VENV=false
+if [ -d "$VENV_DIR" ]; then
+    # ¿Apunta a un intérprete inexistente?
+    if ! head -n1 "$VENV_DIR/bin/pip" | grep -q "$VENV_DIR/bin/python3"; then
+        RECREATE_VENV=true
+        rm -rf "$VENV_DIR"
     fi
+fi
+
+if [ ! -d "$VENV_DIR" ]; then
+    python3 -m venv "$VENV_DIR" || display_error "No se pudo crear el entorno virtual"
     display_success "Entorno virtual creado en $VENV_DIR"
 else
-    display_success "Entorno virtual ya existe"
+    if [ "$RECREATE_VENV" = true ]; then
+        display_success "Entorno virtual recreado en $VENV_DIR"
+    else
+        display_success "Entorno virtual existente válido"
+    fi
 fi
+
+
 
 # 4: Instalación de dependencias Python ---
 echo -e "\n${BOLD}4. Instalando dependencias Python...${NC}"
 
 # 4.5: Activar entorno virtual
 source "$VENV_DIR/bin/activate" || display_error "No se pudo activar el entorno virtual"
+export PATH="$VENV_DIR/bin:$PATH"
+
 
 if ! pip install --upgrade pip; then
     display_warning "No se pudo actualizar pip en el entorno virtual"
 fi
 
-if ! pip install "${PYTHON_DEPS[@]}"; then
+if ! pip install --ignore-installed "${PYTHON_DEPS[@]}"; then
     display_error "Falló la instalación de dependencias Python en el entorno virtual"
 fi
+
 display_success "Dependencias Python instaladas en el entorno virtual"
 deactivate
 
@@ -202,8 +265,8 @@ fi
 echo -e "\n${BOLD}8. Configurando Access Point Odoco...${NC}"
 
 # Ejecutar el script del AP
-if ! sudo ./odoco_ap_setup.sh; then
-    display_warning "Error al configurar el AP. ¿Continuar? [S/n]"
+if [ ! -f "./odoco_ap_setup.sh" ]; then
+    display_warning "No se encontró el archivo odoco_ap_setup.sh. ¿Continuar? [S/n]"
     read -r response
     if [[ "$response" =~ ^[Nn] ]]; then
         display_error "Instalación abortada."
@@ -221,7 +284,7 @@ echo "Usuario del servicio:    $REAL_USER"
 echo "Directorio de instalación: $INSTALL_DIR"
 echo "Entorno virtual:        $VENV_DIR"
 echo "Archivo de servicio:     $SYSTEMD_SERVICE_FILE"
-echo "Dirección de acceso:     http://$IP_ADDRESS/service-admin"
+echo "Dirección de acceso:     http://$IP_ADDRESS/"
 echo "-------------------------------------"
 
 echo -e "\n${BOLD}Comandos útiles:${NC}"

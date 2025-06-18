@@ -1,4 +1,4 @@
-#!/home/rpi/Odoco/venv/bin/python3
+#!/home/kickpi/Odoco/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

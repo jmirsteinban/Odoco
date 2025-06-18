@@ -56,5 +56,5 @@ graph TD
      ```
      d. Ejecutar instalacion
      ```
-       sudo /Odoco/bin/odoco-install
+       sudo Odoco/bin/odoco-install
      ```
