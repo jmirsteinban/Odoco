@@ -165,3 +165,17 @@ El proxy no responde:
 
 bash
 journalctl -u raknet_proxy -f
+
+
+
+K2C Pin 20 (3.3V) ----+
+                      |
+                      +---[4.7KΩ]--- OLED VCC
+                      |
+                      +---[4.7KΩ]--- OLED SDA
+                      |
+                      +---[4.7KΩ]--- OLED SCL
+
+OLED SDA ---- K2C Pin 1 (SDA)
+OLED SCL ---- K2C Pin 3 (SCL)
+OLED GND ---- K2C Pin 19 (GND)
