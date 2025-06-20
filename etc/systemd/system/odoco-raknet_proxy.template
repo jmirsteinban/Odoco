@@ -1,0 +1,22 @@
+# Odocoileus virginianus v1.0
+#
+# odoco-raknet_proxy.template
+#
+
+[Unit]
+Description=Odoco RakNet Proxy Service
+After=network.target
+
+[Service]
+User={{USER}}
+WorkingDirectory={{INSTALL_DIR}}/Raknet
+ExecStart={{PYTHON_BIN}} {{INSTALL_DIR}}/Raknet/odoco-raknet_proxy.py
+Restart=always
+RestartSec=5s
+
+# Límites de recursos
+MemoryMax=128M
+CPUQuota=40%
+
+[Install]
+WantedBy=multi-user.target

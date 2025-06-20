@@ -1,0 +1,12 @@
+[Unit]
+Description=Minecraft RakNet Proxy
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/rpi/Odoco/Raknet/odoco-raknet_proxy.py
+Restart=always
+User=root
+WorkingDirectory=/home/rpi/Odoco/Raknet
+
+[Install]
+WantedBy=multi-user.target
