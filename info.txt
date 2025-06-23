@@ -11,6 +11,7 @@ sudo dstat -cmdn --top-cpu --top-mem
 sudo apt install samba
 whereis samba
 out: samba: /usr/sbin/samba /usr/lib/samba /etc/samba /usr/share/samba /usr/share/man/man7/samba.7.gz /usr/share/man/man8/samba.8.gz
+     
 
 The configuration file for Samba is located at /etc/samba/smb.conf. 
 sudo nano /etc/samba/smb.conf

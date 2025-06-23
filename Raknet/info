@@ -1,0 +1,56 @@
+import socket
+import threading
+import time
+
+def read_ngrok_url():
+    try:
+        with open("/path/to/ngrok_url.txt", "r") as f:
+            url = f.read().strip()
+        if url.startswith("tcp://"):
+            host_port = url.replace("tcp://", "").split(":")
+            return host_port[0], int(host_port[1])
+        return None, None
+    except Exception as e:
+        print(f"Error al leer URL: {e}")
+        return None, None
+
+def handle_client(client_socket, ngrok_host, ngrok_port):
+    # Conecta al servidor de Minecraft a través de ngrok
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        server_socket.connect((ngrok_host, ngrok_port))
+        # Reenvía datos entre cliente y servidor
+        def forward(source, destination):
+            while True:
+                data = source.recv(1024)
+                if not data:
+                    break
+                destination.sendall(data)
+        threading.Thread(target=forward, args=(client_socket, server_socket)).start()
+        threading.Thread(target=forward, args=(server_socket, client_socket)).start()
+    except Exception as e:
+        print(f"Error en proxy: {e}")
+    finally:
+        server_socket.close()
+        client_socket.close()
+
+def start_proxy():
+    ngrok_host, ngrok_port = read_ngrok_url()
+    if not ngrok_host or not ngrok_port:
+        print("No se pudo obtener la URL de ngrok")
+        return
+
+    proxy_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    proxy_socket.bind(("0.0.0.0", 25565))
+    proxy_socket.listen(5)
+    print(f"Proxy iniciado en localhost:25565, redirigiendo a {ngrok_host}:{ngrok_port}")
+
+    while True:
+        client_socket, addr = proxy_socket.accept()
+        print(f"Conexión desde {addr}")
+        threading.Thread(target=handle_client, args=(client_socket, ngrok_host, ngrok_port)).start()
+
+if __name__ == "__main__":
+    while True:
+        start_proxy()
+        time.sleep(60)

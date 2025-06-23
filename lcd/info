@@ -1,6 +1,48 @@
 https://www.youtube.com/watch?v=EVMXTBBCO3A
 
 
+✅ Tabla de pines :
+Pin	Lado Izquierdo (funciones)	Lado Derecho (funciones)
+1	VCC_5V0	VCC_3V3
+2	—	VCC_3V3
+3	GPIO_PH5, I2C3_SDA, UART2_TX, SPI1_CS0, I2S3_MCLK	—
+4	—	GND
+5	GPIO_PH4, I2C3_SCK, UART2_RTS, SPI1_CS1, I2S3_DOUT1	—
+6	—	GND
+7	GPIO_PH9, UART2_CTS, SPI1_MOSI, I2S3_LRCLK, I2C4_SDA	GPIO_PH2, UART5_TX, PWM2, I2C2_SCK
+8	—	GPIO_PH2, UART5_TX, PWM2, I2C2_SCK
+9	GPIO_PH7, UART2_RX, SPI1_MISO, I2S3_DOUT0, I2C4_SCK	GPIO_PH3, UART5_RX, PWM1, I2C2_SDA
+10	—	GPIO_PH3, UART5_RX, PWM1, I2C2_SDA
+11	GPIO_PH8, SPI1_CLK, I2S3_DIN1	GPIO_PC12
+12	—	GPIO_PC12
+13	GPIO_PH6, I2S3_BCLK	GPIO_PC7
+14	—	GPIO_PC7
+15	DEBUG_UART0_RX	GND
+16	—	GND
+17	DEBUG_UART0_TX	USB_HOST_DM* (alternativo a I2C2_SCK)
+18	—	USB_HOST_DM*
+19	GND	USB_HOST_DP* (alternativo a I2C2_SDA)
+20	—	USB_HOST_DP*
+
+🔍 Observaciones clave:
+Pines 1 y 2: Alimentación: 5V y 3.3V.
+
+Pines 3 y 5: Son los reales para I2C3 (SDA y SCL), usando GPIO_PH5 y GPIO_PH4.
+
+Pines 18 y 20: Son USB_HOST_DM y USB_HOST_DP, pero también están marcados como I2C2_SCK y I2C2_SDA. Esto implica multiplexado.
+
+Múltiples funciones por pin: UART, SPI, I2S, I2C, PWM, USB. Depende de cómo lo configures en software o firmware.
+
+✅ Recomendación para conectar OLED I2C 0.91":
+Usa I2C3, que es más claro y menos multiplexado con USB.
+
+OLED Pin	K2B Pin	Etiqueta
+VCC	2 o 4	VCC_3V3
+GND	6 o 16	GND
+SDA	3	GPIO_PH5 / I2C3_SDA
+SCL	5	GPIO_PH4 / I2C3_SCK
+
+
 K2C Pin 20 (3.3V) ----+
                       |
                       +---[4.7KΩ]--- OLED VCC
